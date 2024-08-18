@@ -1,7 +1,7 @@
 import streamlit as st
 import difflib
 
-# 마크다운 문법 데이터 (20개로 확장)
+# 마크다운 문법 데이터 (20개)
 markdown_lessons = [
     {
         "title": "제목 (Headers)",
@@ -154,18 +154,22 @@ def get_difference(user_input, solution):
     return '\n'.join(diff)
 
 def update_lesson(i):
-    st.session_state.current_lesson = i
+    st.session_state.current_lesson = max(0, min(i, len(markdown_lessons) - 1))
 
 def main():
     st.set_page_config(page_title="마크다운 학습 게임", layout="wide")
     
     st.title("마크다운 학습 게임")
     
+    # 세션 상태 초기화
     if "current_lesson" not in st.session_state:
         st.session_state.current_lesson = 0
     
     if "completed_lessons" not in st.session_state:
         st.session_state.completed_lessons = [False] * len(markdown_lessons)
+    
+    # current_lesson이 유효한 범위 내에 있는지 확인
+    st.session_state.current_lesson = max(0, min(st.session_state.current_lesson, len(markdown_lessons) - 1))
 
     # 사이드바: 학습 단계 선택
     st.sidebar.title("학습 단계")
@@ -217,4 +221,16 @@ def main():
     st.write(f"진행 상황: {sum(st.session_state.completed_lessons)}/{len(markdown_lessons)}")
     
     # 이전/다음 버튼
-    col1, col2
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.session_state.current_lesson > 0:
+            if st.button("이전 단계", on_click=update_lesson, args=(st.session_state.current_lesson - 1,)):
+                pass
+    
+    with col2:
+        if st.session_state.current_lesson < len(markdown_lessons) - 1:
+            if st.button("다음 단계", on_click=update_lesson, args=(st.session_state.current_lesson + 1,)):
+                pass
+
+if __name__ == "__main__":
+    main()
